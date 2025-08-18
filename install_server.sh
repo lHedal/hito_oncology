@@ -20,10 +20,40 @@ DB_USER="oncology_user"
 DB_PASS="oncology_secure_password_2024"
 
 echo "📦 Actualizando sistema..."
-sudo apt update && sudo apt upgrade -y
 
-echo "🔧 Instalando dependencias..."
-sudo apt install -y apache2 mariadb-server mariadb-client curl wget git unzip software-properties-common
+# Función para manejar problemas de APT locks
+fix_apt_locks() {
+    echo "🔧 Solucionando problemas de APT locks..."
+    sudo killall apt apt-get dpkg 2>/dev/null || true
+    sudo rm -f /var/lib/dpkg/lock-frontend
+    sudo rm -f /var/lib/dpkg/lock
+    sudo rm -f /var/cache/apt/archives/lock
+    sudo dpkg --configure -a
+    sleep 2
+}
+
+# Intentar actualización con manejo de errores
+if ! sudo apt update; then
+    echo "⚠️  Problema con APT, intentando solucionar..."
+    fix_apt_locks
+    sudo apt update
+fi
+
+echo "⬆️ Actualizando paquetes existentes..."
+sudo apt upgrade -y
+
+echo "🔧 Instalando dependencias básicas..."
+# Instalar paquetes uno por uno para mejor manejo de errores
+packages="apache2 mariadb-server mariadb-client curl wget git unzip software-properties-common apt-transport-https ca-certificates gnupg lsb-release"
+
+for package in $packages; do
+    echo "📦 Instalando $package..."
+    if ! sudo apt install -y "$package"; then
+        echo "⚠️  Error instalando $package, intentando solucionar APT..."
+        fix_apt_locks
+        sudo apt install -y "$package"
+    fi
+done
 
 echo "🐘 Instalando PHP 8.2..."
 sudo add-apt-repository ppa:ondrej/php -y

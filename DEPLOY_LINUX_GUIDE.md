@@ -129,8 +129,8 @@ sudo nano /etc/apache2/sites-available/oncology.conf
 
 ```apache
 <VirtualHost *:80>
-    ServerName tu-dominio.com
-    ServerAlias www.tu-dominio.com
+    ServerName localhost
+    ServerAlias *.ngrok.io *.trycloudflare.com *.serveo.net
     DocumentRoot /var/www/html/hito_oncology
     
     <Directory /var/www/html/hito_oncology>
