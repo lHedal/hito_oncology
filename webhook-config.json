@@ -1,0 +1,35 @@
+[
+  {
+    "id": "deploy-oncology",
+    "execute-command": "/var/www/html/hito_oncology/deploy.sh",
+    "command-working-directory": "/var/www/html/hito_oncology",
+    "response-message": "🚀 Despliegue iniciado exitosamente",
+    "response-headers": {
+      "Access-Control-Allow-Origin": "*"
+    },
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hash-sha1",
+            "secret": "oncology_webhook_secret_2024",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/main",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        }
+      ]
+    }
+  }
+]
